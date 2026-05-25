@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-25T12:00:00.000Z",
+  "title": "Design System: MediTrack Design System",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Carbon Gray",
+        "canonical": "oklch(0.205 0 0)",
+        "tonalRamp": [
+          "oklch(0.12 0 0)",
+          "oklch(0.205 0 0)",
+          "oklch(0.3 0 0)",
+          "oklch(0.45 0 0)",
+          "oklch(0.6 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.88 0 0)",
+          "oklch(0.97 0 0)"
+        ]
+      },
+      "background": {
+        "role": "neutral",
+        "displayName": "Sanctuary Background",
+        "canonical": "oklch(1 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.3 0 0)",
+          "oklch(0.5 0 0)",
+          "oklch(0.7 0 0)",
+          "oklch(0.85 0 0)",
+          "oklch(0.92 0 0)",
+          "oklch(0.97 0 0)",
+          "oklch(1 0 0)"
+        ]
+      },
+      "foreground": {
+        "role": "neutral",
+        "displayName": "Charcoal Text",
+        "canonical": "oklch(0.145 0 0)"
+      },
+      "secondary": {
+        "role": "secondary",
+        "displayName": "Alabaster Surface",
+        "canonical": "oklch(0.97 0 0)"
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Clinical Border",
+        "canonical": "oklch(0.922 0 0)"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display Header",
+        "purpose": "Hero marketing text and big welcome greets."
+      },
+      "headline": {
+        "displayName": "Headline Title",
+        "purpose": "Primary view screen headers."
+      },
+      "title": {
+        "displayName": "Card/Section Title",
+        "purpose": "Major card elements and interactive sections."
+      },
+      "body": {
+        "displayName": "Clinical Body",
+        "purpose": "Medical summaries, diagnostics, and patient descriptions."
+      },
+      "label": {
+        "displayName": "Tabular Label",
+        "purpose": "Exact numeric data, laboratory metrics, and tags."
+      }
+    },
+    "shadows": [
+      {
+        "name": "interactive-rise",
+        "value": "0 4px 12px rgba(0,0,0,0.04)",
+        "purpose": "Diffuse elevation on hover for interactive elements."
+      },
+      {
+        "name": "popover-focus",
+        "value": "0 10px 30px rgba(0,0,0,0.08)",
+        "purpose": "Floating panels, navigation dropdowns, and clinical overlays."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-standard",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Ultra-smooth exponential ease-out for all visual transitions."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Standard action element used across interactive patient and lab views.",
+      "html": "<button class=\"ds-btn-primary\">Confirm Appointment</button>",
+      "css": ".ds-btn-primary { background-color: #2e2e2e; color: #fafafa; font-family: 'Geist', sans-serif; font-size: 0.875rem; font-weight: 500; padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); outline: none; } .ds-btn-primary:hover { background-color: #1a1a1a; } .ds-btn-primary:focus-visible { box-shadow: 0 0 0 3px rgba(179,179,179,0.5); }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Used for alternative, supportive, or passive dashboard options.",
+      "html": "<button class=\"ds-btn-secondary\">Cancel</button>",
+      "css": ".ds-btn-secondary { background-color: #f5f5f5; color: #2e2e2e; font-family: 'Geist', sans-serif; font-size: 0.875rem; font-weight: 500; padding: 8px 16px; border-radius: 6px; border: 1px solid #ebebeb; cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); outline: none; } .ds-btn-secondary:hover { background-color: #e5e5e5; } .ds-btn-secondary:focus-visible { box-shadow: 0 0 0 3px rgba(179,179,179,0.5); }"
+    },
+    {
+      "name": "Clinical TextInput",
+      "kind": "input",
+      "refersTo": "input-default",
+      "description": "Clean, highly structured input fields for patient and lab info entry.",
+      "html": "<input type=\"text\" class=\"ds-input-default\" placeholder=\"Enter diagnostic notes...\" />",
+      "css": ".ds-input-default { background-color: #f5f5f5; color: #212121; font-family: 'Geist', sans-serif; font-size: 0.875rem; padding: 8px 12px; border-radius: 6px; border: 1px solid #ebebeb; width: 100%; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); outline: none; box-sizing: border-box; } .ds-input-default::placeholder { color: #8a8a8a; } .ds-input-default:focus { background-color: #ffffff; border-color: #2e2e2e; box-shadow: 0 0 0 3px rgba(179,179,179,0.5); }"
+    },
+    {
+      "name": "Sanctuary Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Structured containers to group diagnostic reports, tables, or records.",
+      "html": "<div class=\"ds-card\"><h4 class=\"ds-card-title\">Total Cholesterol</h4><p class=\"ds-card-desc\">Detailed breakdown of lipid profiles and target medical ranges.</p></div>",
+      "css": ".ds-card { background-color: #ffffff; border: 1px solid #ebebeb; border-radius: 10px; padding: 24px; box-sizing: border-box; font-family: 'Geist', sans-serif; } .ds-card-title { font-size: 1.25rem; font-weight: 600; color: #212121; margin: 0 0 8px 0; } .ds-card-desc { font-size: 1rem; color: #8a8a8a; margin: 0; line-height: 1.5; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Clinical Sanctuary",
+    "overview": "The Clinical Sanctuary is an interface design strategy formulated specifically for multi-register healthcare portals. It represents the meeting point of deep clinical accuracy and absolute patient composure. By prioritizing serene whitespace, clear semantic layouts, and highly readable high-contrast typographic grids, the system offers an anchor of safety for stressed patients while ensuring a friction-free, high-speed environment for clinical laboratory workers.",
+    "keyCharacteristics": [
+      "Calm Atmosphere: Generous whitespace and low-stimulus transitions reduce cognitive friction.",
+      "Extreme Contrast & Legibility: High typographic scales and dark carbon text elements on pristine background layers ensure effortless readability.",
+      "Symmetric Balance: A strict grid layout keeps dashboard data structured, uncrowded, and highly reassuring."
+    ],
+    "rules": [
+      {
+        "name": "The Rarity Rule",
+        "body": "Bold red and destructive statuses must be used on less than 5% of any screen. If everything screams, nothing is heard. High-contrast indicators are reserved solely for true clinical alerts or required user corrections.",
+        "section": "colors"
+      },
+      {
+        "name": "The No-Color-Reflex Rule",
+        "body": "Avoid default blue and teal highlights for active elements. Keep the interface monochromatic (carbon, gray, and pristine alabaster) so status colors remain completely distinct.",
+        "section": "colors"
+      },
+      {
+        "name": "The 65ch Doctrine",
+        "body": "To maximize readability, paragraph and text container content must never extend past 65 characters in line length.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Resting Rule",
+        "body": "Surfaces rest entirely flat on the Sanctuary Background canvas. Depth is conveyed purely through alabaster background blocks or clean clinical border divisions.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do wrap tabular medical reports in clean, grid-aligned cards with a minimum of 24px of internal padding to ensure high readability.",
+      "Do use Geist Mono for all test result metrics, normal ranges, and reference values.",
+      "Do use whitespace as a functional layout tool, ensuring at least 32px of spacing between major dashboard sections."
+    ],
+    "donts": [
+      "Don't use border-left or border-right greater than 1px as a colored side-stripe accent on status cards or alert notifications.",
+      "Don't combine background-clip: text with gradient fills to create decorative headers.",
+      "Don't use heavy glassmorphic blurs or decorative transparent overlays on medical report screens.",
+      "Don't design identical multi-column card grids with repetitious icons for diverse clinical operations.",
+      "Don't use modals as a first-choice interaction for editing records; prefer inline forms or dedicated routes.",
+      "Don't use em-dashes in medical labels or instruction copy; use colons, semicolons, or commas instead."
+    ]
+  }
+}
