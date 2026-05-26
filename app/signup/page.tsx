@@ -4,10 +4,13 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { signUp } from '@/lib/auth'
-import { createUserProfile } from '@/lib/firestore'
+import { createUserProfile, generateHealthId } from '@/lib/firestore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
+const BLOOD_TYPES = ['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-']
 
 export default function SignupPage() {
   const router = useRouter()
@@ -16,6 +19,10 @@ export default function SignupPage() {
     password: '',
     confirmPassword: '',
     fullName: '',
+    phone: '',
+    dateOfBirth: '',
+    gender: '',
+    bloodType: '',
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -32,7 +39,6 @@ export default function SignupPage() {
     setError('')
     setLoading(true)
 
-    // Validation
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match')
       setLoading(false)
@@ -57,12 +63,17 @@ export default function SignupPage() {
     }
 
     if (user) {
-      // Create user profile
+      const healthId = await generateHealthId()
+
       await createUserProfile(user.uid, {
-        email: user.email,
-        fullName: formData.fullName,
-        createdAt: new Date(),
-        bloodType: '',
+        email: user.email || undefined,
+        name: formData.fullName,
+        phone: formData.phone || undefined,
+        dateOfBirth: formData.dateOfBirth || undefined,
+        gender: formData.gender || undefined,
+        bloodType: formData.bloodType || undefined,
+        healthId,
+        role: 'patient',
         allergies: [],
         medicalHistory: [],
       })
@@ -80,13 +91,13 @@ export default function SignupPage() {
               <div className="text-lg font-bold text-primary-foreground">M</div>
             </div>
             <h1 className="text-2xl font-bold text-foreground">MediTrack</h1>
-            <p className="text-muted-foreground mt-2">Create your account</p>
+            <p className="text-muted-foreground mt-2">Create your patient account</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">
-                Full Name
+                Full Name *
               </label>
               <Input
                 type="text"
@@ -100,7 +111,7 @@ export default function SignupPage() {
 
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">
-                Email
+                Email *
               </label>
               <Input
                 type="email"
@@ -114,21 +125,82 @@ export default function SignupPage() {
 
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">
-                Password
+                Phone Number
+              </label>
+              <Input
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="+233 50 000 0000"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Date of Birth
+                </label>
+                <Input
+                  type="date"
+                  name="dateOfBirth"
+                  value={formData.dateOfBirth}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">
+                  Gender
+                </label>
+                <select
+                  name="gender"
+                  value={formData.gender}
+                  onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                  className="w-full px-3 py-2 border border-border rounded bg-background text-foreground text-sm"
+                >
+                  <option value="">Select</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">
+                Blood Type
+              </label>
+              <select
+                name="bloodType"
+                value={formData.bloodType}
+                onChange={(e) => setFormData({ ...formData, bloodType: e.target.value })}
+                className="w-full px-3 py-2 border border-border rounded bg-background text-foreground text-sm"
+              >
+                <option value="">Select blood type</option>
+                {BLOOD_TYPES.map((type) => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">
+                Password *
               </label>
               <Input
                 type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="••••••••"
+                placeholder="At least 6 characters"
                 required
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-foreground mb-1">
-                Confirm Password
+                Confirm Password *
               </label>
               <Input
                 type="password"

@@ -6,26 +6,14 @@ import { useRouter } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { HealthIdCard } from '@/components/HealthIdCard'
 import Link from 'next/link'
-import { Droplets, BarChart3, Calendar, Check } from 'lucide-react'
-import { getTestResults, getAppointments, getUserProfile } from '@/lib/firestore'
-
-interface TestResult {
-  id: string
-  testName: string
-  testDate: any
-  status: string
-}
-
-interface Appointment {
-  id: string
-  testType: string
-  appointmentDate: any
-  status: string
-}
+import { Droplets, BarChart3, Calendar, Check, Bell } from 'lucide-react'
+import { subscribeToTestResults, subscribeToAppointments, getUserProfile } from '@/lib/firestore'
 
 interface UserProfile {
-  fullName?: string
+  name?: string
+  healthId?: string
   bloodType?: string
   email?: string
 }
@@ -33,8 +21,8 @@ interface UserProfile {
 export default function Dashboard() {
   const { user, loading, isAuthenticated } = useAuth()
   const router = useRouter()
-  const [testResults, setTestResults] = useState<TestResult[]>([])
-  const [appointments, setAppointments] = useState<Appointment[]>([])
+  const [testResults, setTestResults] = useState<any[]>([])
+  const [appointments, setAppointments] = useState<any[]>([])
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [pageLoading, setPageLoading] = useState(true)
 
@@ -44,32 +32,28 @@ export default function Dashboard() {
       return
     }
 
-    if (user) {
-      loadData()
-    }
-  }, [user, loading, isAuthenticated, router])
-
-  const loadData = async () => {
     if (!user) return
 
-    const [testRes, appointRes, profileRes] = await Promise.allSettled([
-      getTestResults(user.uid),
-      getAppointments(user.uid),
-      getUserProfile(user.uid),
-    ])
+    const unsubTestResults = subscribeToTestResults(user.uid, (results) => {
+      setTestResults(results.slice(0, 3))
+    })
+    const unsubAppointments = subscribeToAppointments(user.uid, (appointments) => {
+      setAppointments(appointments.slice(0, 3))
+    })
 
-    if (testRes.status === 'fulfilled' && testRes.value.data) {
-      setTestResults(testRes.value.data.slice(0, 3))
-    }
-    if (appointRes.status === 'fulfilled' && appointRes.value.data) {
-      setAppointments(appointRes.value.data.slice(0, 3))
-    }
-    if (profileRes.status === 'fulfilled' && profileRes.value.data) {
-      setProfile(profileRes.value.data as UserProfile)
-    }
+    getUserProfile(user.uid).then(({ data }) => {
+      if (data) {
+        setProfile(data as UserProfile)
+      }
+    }).finally(() => {
+      setPageLoading(false)
+    })
 
-    setPageLoading(false)
-  }
+    return () => {
+      unsubTestResults()
+      unsubAppointments()
+    }
+  }, [user, loading, isAuthenticated, router])
 
   if (loading || pageLoading) {
     return (
@@ -92,12 +76,21 @@ export default function Dashboard() {
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            Welcome, {profile?.fullName || user?.email?.split('@')[0]}!
+            Welcome, {profile?.name || user?.email?.split('@')[0]}!
           </h1>
           <p className="text-muted-foreground">
             Manage your health records, appointments, and find nearby pharmacies
           </p>
         </div>
+
+        {/* Health ID Card */}
+        {profile?.healthId && (
+          <HealthIdCard
+            healthId={profile.healthId}
+            patientName={profile.name}
+            className="mb-8"
+          />
+        )}
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
@@ -167,6 +160,7 @@ export default function Dashboard() {
                           <p className="font-medium text-foreground">{test.testName}</p>
                           <p className="text-sm text-muted-foreground">
                             {test.testDate?.toDate?.()?.toLocaleDateString?.() ||
+                              test.uploadedAt?.toDate?.()?.toLocaleDateString?.() ||
                               'Date not available'}
                           </p>
                         </div>
@@ -238,7 +232,7 @@ export default function Dashboard() {
         {/* Quick Actions */}
         <Card className="p-6 mt-8">
           <h2 className="text-xl font-bold text-foreground mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             <Link href="/appointments/book">
               <Button className="w-full bg-primary hover:bg-primary/90">
                 Book Appointment
@@ -246,7 +240,18 @@ export default function Dashboard() {
             </Link>
             <Link href="/test-results">
               <Button variant="outline" className="w-full">
-                View Test Results
+                Test Results
+              </Button>
+            </Link>
+            <Link href="/medications">
+              <Button variant="outline" className="w-full">
+                Medications
+              </Button>
+            </Link>
+            <Link href="/reminders">
+              <Button variant="outline" className="w-full">
+                <Bell className="size-4 mr-2" />
+                Reminders
               </Button>
             </Link>
             <Link href="/pharmacy-finder">

@@ -14,7 +14,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     await signOut()
-    router.push('/login')
+    router.push('/')
   }
 
   if (!isAuthenticated) return null
@@ -37,8 +37,17 @@ export default function Navbar() {
             <Link href="/test-results" className="hover:opacity-80 transition">
               Tests
             </Link>
+            <Link href="/drug-search" className="hover:opacity-80 transition">
+              Drugs
+            </Link>
+            <Link href="/medications" className="hover:opacity-80 transition">
+              Medications
+            </Link>
             <Link href="/appointments" className="hover:opacity-80 transition">
               Appointments
+            </Link>
+            <Link href="/reminders" className="hover:opacity-80 transition">
+              Reminders
             </Link>
             <Link href="/pharmacy-finder" className="hover:opacity-80 transition">
               Pharmacy

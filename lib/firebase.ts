@@ -3,6 +3,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app'
 import { getAuth, Auth } from 'firebase/auth'
 import { getFirestore, Firestore } from 'firebase/firestore'
+import { getStorage, FirebaseStorage } from 'firebase/storage'
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '',
@@ -16,6 +17,7 @@ const firebaseConfig = {
 let app
 let auth: Auth
 let db: Firestore
+let storage: FirebaseStorage
 
 try {
   if (getApps().length === 0) {
@@ -25,9 +27,9 @@ try {
   }
   auth = getAuth(app)
   db = getFirestore(app)
+  storage = getStorage(app)
 } catch (error: any) {
   console.error('Firebase initialization error:', error)
-  // Allow app to continue, but Firebase features won't work until configured
 }
 
-export { auth, db, app }
+export { auth, db, storage, app }

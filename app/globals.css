@@ -4,42 +4,66 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(0.98 0.001 218);
-  --foreground: oklch(0.16 0.04 218);
+  /* Clinical Sanctuary Design System Colors */
+  --background: oklch(1 0 0); /* Sanctuary Background - #ffffff */
+  --foreground: oklch(0.145 0 0); /* Charcoal Text - #212121 */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.16 0.04 218);
+  --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.16 0.04 218);
-  --primary: oklch(0.45 0.15 218);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0); /* Carbon Gray - #2e2e2e */
   --primary-foreground: oklch(0.98 0 0);
-  --secondary: oklch(0.55 0.12 162);
-  --secondary-foreground: oklch(1 0 0);
-  --muted: oklch(0.9 0.01 218);
-  --muted-foreground: oklch(0.5 0.02 218);
-  --accent: oklch(0.52 0.18 142);
-  --accent-foreground: oklch(1 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
+  --secondary: oklch(0.97 0 0); /* Alabaster Surface - #f5f5f5 */
+  --secondary-foreground: oklch(0.205 0 0); /* Carbon Gray */
+  --muted: oklch(0.97 0 0); /* Alabaster Surface */
+  --muted-foreground: oklch(0.54 0 0); /* Medium Gray - #8a8a8a */
+  --accent: oklch(0.205 0 0); /* Carbon Gray (no color reflex rule) */
+  --accent-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.577 0.245 27.325); /* Destructive Red - #ba1a1a */
   --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.93 0.01 218);
-  --input: oklch(0.95 0.01 218);
-  --ring: oklch(0.45 0.15 218);
-  --chart-1: oklch(0.45 0.15 218);
-  --chart-2: oklch(0.52 0.18 142);
-  --chart-3: oklch(0.65 0.12 162);
-  --chart-4: oklch(0.55 0.14 35);
-  --chart-5: oklch(0.48 0.16 248);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.97 0.01 218);
-  --sidebar-foreground: oklch(0.16 0.04 218);
-  --sidebar-primary: oklch(0.45 0.15 218);
+  --border: oklch(0.922 0 0); /* Clinical Border - #ebebeb */
+  --input: oklch(0.922 0 0); /* Clinical Border */
+  --ring: oklch(0.702 0 0); /* #b3b3b3 */
+  
+  /* Chart colors using status colors (reserved for true clinical alerts/status) */
+  --chart-1: oklch(0.577 0.245 27.325); /* Destructive Red (alert) */
+  --chart-2: oklch(0.75 0.12 142); /* Green (normal status) */
+  --chart-3: oklch(0.65 0.15 60); /* Yellow (pending) */
+  --chart-4: oklch(0.3 0 0); /* Dark carbon (data visualization) */
+  --chart-5: oklch(0.205 0 0); /* Carbon Gray (data visualization) */
+  
+  /* Spacing system */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  
+  /* Border radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  
+  /* Shadows */
+  --shadow-interactive-rise: 0 4px 12px oklch(0 0 0 / 0.04);
+  --shadow-popover-focus: 0 10px 30px oklch(0 0 0 / 0.08);
+  --shadow-sm: 0 1px 2px 0 oklch(0 0 0 / 0.05);
+  --shadow-base: 0 2px 4px 0 oklch(0 0 0 / 0.08);
+  
+  /* Sidebar styling (maintains consistency) */
+  --sidebar: oklch(0.97 0 0); /* Alabaster Surface */
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0); /* Carbon Gray */
   --sidebar-primary-foreground: oklch(0.98 0 0);
-  --sidebar-accent: oklch(0.52 0.18 142);
-  --sidebar-accent-foreground: oklch(1 0 0);
-  --sidebar-border: oklch(0.93 0.01 218);
-  --sidebar-ring: oklch(0.45 0.15 218);
+  --sidebar-accent: oklch(0.205 0 0); /* Carbon Gray */
+  --sidebar-accent-foreground: oklch(0.98 0 0);
+  --sidebar-border: oklch(0.922 0 0); /* Clinical Border */
+  --sidebar-ring: oklch(0.702 0 0);
 }
 
 .dark {
+  /* Clinical Sanctuary system uses light mode by default.
+     Dark mode maintains high contrast but shifts to dark backgrounds. */
   --background: oklch(0.14 0.02 218);
   --foreground: oklch(0.9 0.02 218);
   --card: oklch(0.2 0.02 218);
@@ -59,11 +83,11 @@
   --border: oklch(0.28 0.02 218);
   --input: oklch(0.25 0.02 218);
   --ring: oklch(0.6 0.15 218);
-  --chart-1: oklch(0.6 0.15 218);
-  --chart-2: oklch(0.65 0.18 142);
-  --chart-3: oklch(0.7 0.12 162);
-  --chart-4: oklch(0.65 0.14 35);
-  --chart-5: oklch(0.62 0.16 248);
+  --chart-1: oklch(0.6 0.2 27);
+  --chart-2: oklch(0.7 0.12 142);
+  --chart-3: oklch(0.75 0.15 60);
+  --chart-4: oklch(0.5 0 0);
+  --chart-5: oklch(0.6 0 0);
   --sidebar: oklch(0.18 0.02 218);
   --sidebar-foreground: oklch(0.9 0.02 218);
   --sidebar-primary: oklch(0.6 0.15 218);
@@ -101,10 +125,9 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -119,7 +142,85 @@
   * {
     @apply border-border outline-ring/50;
   }
+  
+  html {
+    /* Improve text rendering for clinical precision */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+  }
+  
+  /* Typography hierarchy - Clinical Sanctuary design system */
+  h1, .text-display {
+    @apply font-sans font-bold text-[clamp(2.25rem,5vw,3.5rem)] leading-[1.15];
+  }
+  
+  h2, .text-headline {
+    @apply font-sans font-semibold text-[1.875rem] leading-[1.25];
+  }
+  
+  h3, .text-title {
+    @apply font-sans font-semibold text-[1.25rem] leading-[1.3];
+  }
+  
+  h4, h5, h6 {
+    @apply font-sans font-semibold text-[1rem] leading-[1.5];
+  }
+  
+  p, .text-body {
+    @apply font-sans font-normal text-[1rem] leading-[1.5] max-w-prose;
+  }
+  
+  label, .text-label {
+    @apply font-mono font-medium text-[0.875rem] leading-[1.4];
+  }
+  
+  /* 65ch Rule: Body text line length cap for readability */
+  article, section, .prose, [role="region"] {
+    & p {
+      max-width: 65ch;
+    }
+  }
+  
+  /* Button base styles - Clinical Sanctuary */
+  button, [role="button"] {
+    @apply font-sans font-medium rounded-[6px] transition-colors;
+  }
+  
+  /* Card/container styles - Clinical Sanctuary */
+  .card, [role="complementary"] {
+    @apply rounded-[10px] border border-border bg-card;
+  }
+  
+  /* Input styles - Clinical Sanctuary */
+  input, textarea, select {
+    @apply rounded-[6px] border border-input bg-white px-[12px] py-[4px] font-sans text-foreground;
+    
+    &:focus {
+      @apply outline-none ring-2 ring-ring border-primary;
+    }
+  }
+  
+  /* Remove default webkit styles for inputs */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  textarea,
+  select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+  
+  /* High contrast focus states for accessibility */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
   }
 }

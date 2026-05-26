@@ -10,7 +10,8 @@ import { Input } from '@/components/ui/input'
 import { getUserProfile, updateUserProfile } from '@/lib/firestore'
 
 interface UserProfile {
-  fullName?: string
+  name?: string
+  healthId?: string
   email?: string
   phone?: string
   dateOfBirth?: string
@@ -51,8 +52,12 @@ export default function ProfilePage() {
 
     const { data } = await getUserProfile(user.uid)
     if (data) {
-      setProfile(data as UserProfile)
-      setFormData(data as UserProfile)
+      const profileData = data as any
+      if (profileData.fullName && !profileData.name) {
+        profileData.name = profileData.fullName
+      }
+      setProfile(profileData as UserProfile)
+      setFormData(profileData as UserProfile)
     }
     setPageLoading(false)
   }
@@ -188,6 +193,30 @@ export default function ProfilePage() {
           </div>
         )}
 
+        {/* Health ID Display */}
+        {profile.healthId && (
+          <Card className="p-5 mb-6">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center">
+                <span className="text-2xl font-bold font-mono text-primary">
+                  {profile.healthId.slice(0, 2)}
+                </span>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  Patient Health ID
+                </p>
+                <p className="text-lg font-bold font-mono text-foreground tracking-wider">
+                  {profile.healthId}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Use this ID at any lab to retrieve your records
+                </p>
+              </div>
+            </div>
+          </Card>
+        )}
+
         <form onSubmit={handleSubmit}>
           {/* Personal Information */}
           <Card className="p-6 mb-6">
@@ -203,14 +232,14 @@ export default function ProfilePage() {
                 {isEditing ? (
                   <Input
                     type="text"
-                    name="fullName"
-                    value={formData.fullName || ''}
+                    name="name"
+                    value={formData.name || ''}
                     onChange={handleChange}
                     placeholder="Your full name"
                   />
                 ) : (
                   <p className="text-foreground py-2">
-                    {profile.fullName || '—'}
+                    {profile.name || '—'}
                   </p>
                 )}
               </div>

@@ -53,7 +53,7 @@ export default function BookAppointmentPage() {
   const loadLabs = async () => {
     const { data } = await getLabs()
     if (data && data.length > 0) {
-      setLabs(data)
+      setLabs(data.map((l) => ({ id: l.id!, name: l.name, address: l.address })))
     } else {
       // Use mock labs if none in database
       setLabs([
