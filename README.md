@@ -154,6 +154,7 @@ lib/
 1. Get an API key from [Google Cloud Console](https://console.cloud.google.com)
 2. Add to `.env.local`:
    ```
+   GOOGLE_MAPS_API_KEY=your_server_side_maps_api_key
    NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_maps_api_key
    ```
 3. Update `pharmacy-finder/page.tsx` to use real location data

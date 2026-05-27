@@ -171,7 +171,7 @@ service cloud.firestore {
             MediTrack also supports these optional features when configured:
           </p>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li>🗺️ <strong>Google Maps API:</strong> Set <code className="bg-white px-1 rounded text-xs">NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</code> for real pharmacy locations</li>
+            <li>🗺️ <strong>Google Maps API:</strong> Set <code className="bg-white px-1 rounded text-xs">GOOGLE_MAPS_API_KEY</code> for the server proxy and <code className="bg-white px-1 rounded text-xs">NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</code> for the map SDK</li>
             <li>🤖 <strong>Gemini API:</strong> Set <code className="bg-white px-1 rounded text-xs">NEXT_PUBLIC_GEMINI_API_KEY</code> for AI-powered test explanations</li>
           </ul>
         </Card>

@@ -25,7 +25,7 @@ export function PharmacyMapCanvas({
   const center = useMemo(() => {
     if (userLocation) return { lat: userLocation.lat, lng: userLocation.lng }
     if (pharmacies.length > 0) return { lat: pharmacies[0].lat, lng: pharmacies[0].lng }
-    return { lat: 5.6037, lng: -0.1870 }
+    return { lat: 6.5244, lng: 3.3792 }
   }, [userLocation, pharmacies])
 
   if (!MAPS_API_KEY) {
