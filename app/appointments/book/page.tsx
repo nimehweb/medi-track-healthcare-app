@@ -100,7 +100,8 @@ export default function BookAppointmentPage() {
       testType,
       labId: selectedLab,
       appointmentDate: appointmentDateTime,
-      status: 'confirmed',
+      status: 'pending',
+      createdBy: 'patient',
     })
 
     if (createError) {
@@ -109,7 +110,8 @@ export default function BookAppointmentPage() {
       return
     }
 
-    router.push('/appointments')
+    setSubmitting(false)
+    setStep(4)
   }
 
   if (loading || pageLoading) {
@@ -140,7 +142,7 @@ export default function BookAppointmentPage() {
           Book Appointment
         </h1>
         <p className="text-muted-foreground mb-8">
-          Step {step} of 3 - {step === 1 ? 'Select Test Type' : step === 2 ? 'Choose Lab' : 'Schedule Date'}
+          {step === 4 ? '' : `Step ${step} of 3 - ${step === 1 ? 'Select Test Type' : step === 2 ? 'Choose Lab' : 'Schedule Date'}`}
         </p>
 
         <Card className="p-8">
@@ -250,6 +252,32 @@ export default function BookAppointmentPage() {
             </form>
           )}
 
+          {/* Step 4: Success / Approval Notice */}
+          {step === 4 && (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-foreground mb-2">
+                Appointment Request Submitted
+              </h2>
+              <p className="text-muted-foreground mb-2">
+                Your appointment request has been submitted and is pending lab approval
+              </p>
+              <p className="text-sm text-muted-foreground mb-6">
+                You will be notified once the lab confirms your appointment
+              </p>
+              <Button
+                onClick={() => router.push('/appointments')}
+                className="bg-primary hover:bg-primary/90"
+              >
+                View My Appointments
+              </Button>
+            </div>
+          )}
+
           {/* Error Message */}
           {error && step !== 3 && (
             <div className="p-3 bg-destructive/10 border border-destructive/20 rounded text-sm text-destructive mb-4">
@@ -259,7 +287,7 @@ export default function BookAppointmentPage() {
 
           {/* Navigation Buttons */}
           <div className="flex items-center gap-4 mt-6">
-            {step > 1 && (
+            {step > 1 && step < 4 && (
               <Button variant="outline" onClick={handleBack}>
                 Back
               </Button>

@@ -257,6 +257,26 @@ export const createTestResult = async (testData: Partial<TestResult>) => {
   }
 }
 
+export const createLabTestResult = async (
+  patientHealthId: string,
+  labId: string,
+  labStaffId: string,
+  testData: { testName: string; testType?: string; results?: any; pdfUrl?: string }
+) => {
+  const { data: patient } = await getUserByHealthId(patientHealthId)
+  if (!patient) return { id: null, error: 'Patient not found for this Health ID' }
+  if (patient.id === labStaffId) {
+    return { id: null, error: 'Cannot assign a test result to yourself. Must be a different patient.' }
+  }
+  return createTestResult({
+    patientId: patient.id,
+    patientHealthId,
+    labId,
+    ...testData,
+    status: 'ready',
+  })
+}
+
 export const updateTestResult = async (testId: string, testData: Partial<TestResult>) => {
   try {
     await updateDoc(doc(db, 'testResults', testId), testData)
@@ -336,6 +356,87 @@ export const createAppointment = async (appointmentData: any) => {
 export const deleteAppointment = async (appointmentId: string) => {
   try {
     await deleteDoc(doc(db, 'appointments', appointmentId))
+    return { success: true, error: null }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+}
+
+export const getAppointmentsByLab = async (labId: string) => {
+  try {
+    const q = query(
+      collection(db, 'appointments'),
+      where('labId', '==', labId)
+    )
+    const querySnapshot = await getDocs(q)
+    const appointments = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }))
+    return { data: appointments, error: null }
+  } catch (error: any) {
+    return { data: null, error: error.message }
+  }
+}
+
+export const subscribeToAppointmentsByLab = (
+  labId: string,
+  onData: (appointments: any[]) => void,
+  onError?: (error: string) => void
+): Unsubscribe => {
+  const q = query(
+    collection(db, 'appointments'),
+    where('labId', '==', labId)
+  )
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const appointments = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
+      onData(appointments)
+    },
+    (error) => {
+      console.error('Appointments by lab subscription error:', error)
+      onError?.(error.message)
+    }
+  )
+}
+
+export const rescheduleAppointment = async (appointmentId: string, newDate: Date) => {
+  try {
+    await updateDoc(doc(db, 'appointments', appointmentId), {
+      appointmentDate: Timestamp.fromDate(newDate),
+      status: 'pending',
+      updatedAt: Timestamp.now(),
+      rescheduledAt: Timestamp.now(),
+    })
+    return { success: true, error: null }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+}
+
+export const approveAppointment = async (appointmentId: string) => {
+  try {
+    await updateDoc(doc(db, 'appointments', appointmentId), {
+      status: 'confirmed',
+      updatedAt: Timestamp.now(),
+      approvedAt: Timestamp.now(),
+    })
+    return { success: true, error: null }
+  } catch (error: any) {
+    return { success: false, error: error.message }
+  }
+}
+
+export const rejectAppointment = async (appointmentId: string) => {
+  try {
+    await updateDoc(doc(db, 'appointments', appointmentId), {
+      status: 'rejected',
+      updatedAt: Timestamp.now(),
+    })
     return { success: true, error: null }
   } catch (error: any) {
     return { success: false, error: error.message }

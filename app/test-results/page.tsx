@@ -9,9 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
 import { getTestResults } from '@/lib/firestore'
-import { TestResultUpload } from '@/components/TestResultUpload'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Waypoints, List, Upload, Search, Filter } from 'lucide-react'
+import { Waypoints, List, Search } from 'lucide-react'
 
 interface TestResult {
   id: string
@@ -31,7 +29,6 @@ export default function TestResultsPage() {
   const [filter, setFilter] = useState<string>('all')
   const [viewMode, setViewMode] = useState<'grid' | 'timeline'>('grid')
   const [searchQuery, setSearchQuery] = useState('')
-  const [uploadOpen, setUploadOpen] = useState(false)
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -102,23 +99,9 @@ export default function TestResultsPage() {
           <div>
             <h1 className="text-3xl font-bold text-foreground mb-2">Test Results</h1>
             <p className="text-muted-foreground">
-              View, track, and upload your medical test results
+              View your medical test results from your lab
             </p>
           </div>
-          <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-primary hover:bg-primary/90 gap-2">
-                <Upload className="size-4" />
-                Upload Result
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Upload Past Test Result</DialogTitle>
-              </DialogHeader>
-              <TestResultUpload onUploadComplete={() => { loadTestResults(); setUploadOpen(false) }} />
-            </DialogContent>
-          </Dialog>
         </div>
 
         {/* Filters */}
@@ -267,19 +250,8 @@ export default function TestResultsPage() {
               No test results yet
             </p>
             <p className="text-muted-foreground mb-6">
-              Book an appointment or upload a past result
+              Your lab will upload your test results here once they are ready
             </p>
-            <div className="flex gap-3 justify-center">
-              <Link href="/appointments/book">
-                <Button className="bg-primary hover:bg-primary/90">
-                  Book Appointment
-                </Button>
-              </Link>
-              <Button variant="outline" onClick={() => setUploadOpen(true)}>
-                <Upload className="size-4 mr-2" />
-                Upload Result
-              </Button>
-            </div>
           </Card>
         )}
       </main>

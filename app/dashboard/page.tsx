@@ -79,7 +79,7 @@ export default function Dashboard() {
             Welcome, {profile?.name || user?.email?.split('@')[0]}!
           </h1>
           <p className="text-muted-foreground">
-            Manage your health records, appointments, and find nearby pharmacies
+            View your health records, test results, and find nearby pharmacies
           </p>
         </div>
 
@@ -232,12 +232,7 @@ export default function Dashboard() {
         {/* Quick Actions */}
         <Card className="p-6 mt-8">
           <h2 className="text-xl font-bold text-foreground mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            <Link href="/appointments/book">
-              <Button className="w-full bg-primary hover:bg-primary/90">
-                Book Appointment
-              </Button>
-            </Link>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             <Link href="/test-results">
               <Button variant="outline" className="w-full">
                 Test Results

@@ -1,7 +1,9 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Copy, Check } from 'lucide-react'
 import QRCode from 'qrcode'
 
 interface HealthIdCardProps {
@@ -12,6 +14,7 @@ interface HealthIdCardProps {
 
 export function HealthIdCard({ healthId, patientName, className = '' }: HealthIdCardProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     if (canvasRef.current && healthId) {
@@ -27,6 +30,24 @@ export function HealthIdCard({ healthId, patientName, className = '' }: HealthId
     }
   }, [healthId])
 
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(healthId)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea')
+      textArea.value = healthId
+      document.body.appendChild(textArea)
+      textArea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textArea)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
   return (
     <Card className={`p-5 ${className}`}>
       <div className="flex items-center gap-5">
@@ -37,16 +58,31 @@ export function HealthIdCard({ healthId, patientName, className = '' }: HealthId
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">
             Patient Health ID
           </p>
-          <p className="text-xl font-bold font-mono text-foreground tracking-wider">
-            {healthId}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-xl font-bold font-mono text-foreground tracking-wider">
+              {healthId}
+            </p>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleCopy}
+              className="h-7 px-2"
+              title="Copy Health ID"
+            >
+              {copied ? (
+                <Check className="size-4 text-accent" />
+              ) : (
+                <Copy className="size-4 text-muted-foreground" />
+              )}
+            </Button>
+          </div>
           {patientName && (
             <p className="text-sm text-muted-foreground mt-1 truncate">
               {patientName}
             </p>
           )}
           <p className="text-xs text-muted-foreground mt-2">
-            Show this QR code at the lab to retrieve your records
+            Show this QR code at the lab or share your Health ID to receive results
           </p>
         </div>
       </div>

@@ -8,12 +8,13 @@ import { auth } from '@/lib/firebase'
 import { getUserProfile } from '@/lib/firestore'
 import { signOut } from '@/lib/auth'
 import { Button } from '@/components/ui/button'
-import { LayoutDashboard, Search, Upload, Clock, LogOut, Hospital, ChevronLeft } from 'lucide-react'
+import { LayoutDashboard, Search, Upload, Clock, LogOut, Hospital, ChevronLeft, Calendar } from 'lucide-react'
 
 const NAV_ITEMS = [
   { href: '/lab/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/lab/patients', label: 'Find Patient', icon: Search },
   { href: '/lab/upload', label: 'Upload Result', icon: Upload },
+  { href: '/lab/appointments', label: 'Appointments', icon: Calendar },
   { href: '/lab/history', label: 'History', icon: Clock },
 ]
 

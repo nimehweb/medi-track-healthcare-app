@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
-import { getUserProfile, createTestResult } from '@/lib/firestore'
+import { getUserProfile, createLabTestResult } from '@/lib/firestore'
 import { getUserByHealthId } from '@/lib/firestore'
 import { uploadTestFile, validateTestFile } from '@/lib/storage'
 import { Card } from '@/components/ui/card'
@@ -39,6 +39,7 @@ export default function LabUploadPage() {
 
   const [authorized, setAuthorized] = useState(false)
   const [labId, setLabId] = useState<string | null>(null)
+  const [labStaffId, setLabStaffId] = useState<string | null>(null)
 
   const [patientQuery, setPatientQuery] = useState(searchParams.get('healthId') || '')
   const [patient, setPatient] = useState<any>(null)
@@ -58,6 +59,7 @@ export default function LabUploadPage() {
       if (!user) { router.push('/lab/login'); return }
       const { data: profile } = await getUserProfile(user.uid)
       if (!profile || profile.role !== 'lab_staff') { router.push('/lab/login'); return }
+      setLabStaffId(user.uid)
       setLabId(profile.labId || null)
       setAuthorized(true)
     })
@@ -90,7 +92,7 @@ export default function LabUploadPage() {
   }
 
   const handleSend = async () => {
-    if (!labId || !patient || (!testName && !testType)) return
+    if (!labId || !labStaffId || !patient || (!testName && !testType)) return
 
     setSending(true)
     setResult(null)
@@ -107,16 +109,17 @@ export default function LabUploadPage() {
       pdfUrl = url
     }
 
-    const { id, error: createError } = await createTestResult({
-      patientId: patient.id,
-      patientHealthId: patient.healthId,
+    const { id, error: createError } = await createLabTestResult(
+      patient.healthId,
       labId,
-      testName: testName || testType,
-      testType,
-      status: 'ready',
-      results: resultValues ? { value: resultValues } : undefined,
-      pdfUrl,
-    })
+      labStaffId,
+      {
+        testName: testName || testType,
+        testType,
+        results: resultValues ? { value: resultValues } : undefined,
+        pdfUrl,
+      }
+    )
 
     if (createError) {
       setResult({ success: false, error: createError })
@@ -156,7 +159,7 @@ export default function LabUploadPage() {
       <Card className="p-6">
         <h2 className="font-bold text-foreground mb-4 flex items-center gap-2">
           <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">1</span>
-          Find Patient
+          Find Patient by Health ID *
         </h2>
 
         <div className="flex gap-3">
