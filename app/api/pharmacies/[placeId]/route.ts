@@ -2,8 +2,10 @@ import { NextResponse } from 'next/server'
 
 export async function GET(
   _request: Request,
-  { params }: { params: { placeId: string } }
+  { params }: { params: Promise<{ placeId: string }> }
 ) {
+  const { placeId } = await params
+
   const apiKey = process.env.GOOGLE_MAPS_API_KEY
   if (!apiKey) {
     return NextResponse.json({ error: 'Missing Google Maps API key' }, { status: 500 })
@@ -11,7 +13,7 @@ export async function GET(
 
   const url =
     `https://maps.googleapis.com/maps/api/place/details/json` +
-    `?place_id=${encodeURIComponent(params.placeId)}` +
+    `?place_id=${encodeURIComponent(placeId)}` +
     `&fields=name,formatted_address,geometry,rating,user_ratings_total,opening_hours,formatted_phone_number,website,reviews` +
     `&key=${encodeURIComponent(apiKey)}`
 
