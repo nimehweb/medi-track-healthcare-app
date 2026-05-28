@@ -17,19 +17,19 @@ node_modules
 # Archived auto-generated documentation and setup scripts
 _archived/
 
-# Feature code (not yet ready to commit)
-app/lab/
-app/medications/
-app/reminders/
-app/drug-search/
-components/Medication*.tsx
-components/Reminder*.tsx
-components/HealthId*.tsx
-components/PharmacyFinder*.tsx
-context/LabAuth*.tsx
-lib/gemini.ts
-lib/maps.ts
-lib/storage.ts
-lib/design-tokens.ts
-hooks/usePharmacy*.ts
-tailwind.config.ts
+# # Feature code (not yet ready to commit)
+# app/lab/
+# app/medications/
+# app/reminders/
+# app/drug-search/
+# components/Medication*.tsx
+# components/Reminder*.tsx
+# components/HealthId*.tsx
+# components/PharmacyFinder*.tsx
+# context/LabAuth*.tsx
+# lib/gemini.ts
+# lib/maps.ts
+# lib/storage.ts
+# lib/design-tokens.ts
+# hooks/usePharmacy*.ts
+# tailwind.config.ts
