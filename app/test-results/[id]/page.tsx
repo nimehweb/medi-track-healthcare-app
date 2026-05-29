@@ -8,10 +8,10 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import Link from 'next/link'
-import { getTestResultById, updateTestResult } from '@/lib/firestore'
+import { getTestResultById, updateTestResult, getLabById } from '@/lib/firestore'
 import { TestResultCard } from '@/components/TestResultCard'
 import { MedicationInfoCard } from '@/components/MedicationInfoCard'
-import { FileText, Share2, Printer, AlertCircle } from 'lucide-react'
+import { FileText, Share2, Printer, AlertCircle, FileImage, Building2, Phone, MapPin } from 'lucide-react'
 
 interface TestResult {
   id: string
@@ -44,6 +44,7 @@ export default function TestDetailPage() {
   const [pageLoading, setPageLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [savingExplanation, setSavingExplanation] = useState(false)
+  const [labInfo, setLabInfo] = useState<{ name: string; address?: string; phone?: string; email?: string } | null>(null)
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -63,6 +64,13 @@ export default function TestDetailPage() {
       const { data, error: loadError } = await getTestResultById(testId)
       if (data) {
         setTestResult(data as unknown as TestResult)
+        const labId = (data as any).labId
+        if (labId && labId !== 'manual-upload') {
+          const { data: lab } = await getLabById(labId)
+          if (lab) {
+            setLabInfo({ name: lab.name, address: lab.address, phone: lab.phone, email: lab.email })
+          }
+        }
       } else if (loadError) {
         console.error('Failed to load test result:', loadError)
         setError(loadError)
@@ -197,6 +205,11 @@ export default function TestDetailPage() {
               onExplanation={cacheExplanation}
             />
 
+            {/* File Viewer - PDF or Image */}
+            {testResult.pdfUrl && (
+              <FileViewer url={testResult.pdfUrl} />
+            )}
+
             {/* Medications Section */}
             {testResult.medications && testResult.medications.length > 0 && (
               <div className="space-y-4">
@@ -242,8 +255,31 @@ export default function TestDetailPage() {
               {/* Lab Information */}
               <div className="mt-6 pt-6 border-t border-border">
                 <p className="text-label text-muted-foreground mb-3">Lab Information</p>
-                <p className="font-medium text-foreground">{testResult.labId || 'Lab details'}</p>
-                <p className="text-label text-muted-foreground mt-2">
+                {labInfo ? (
+                  <div className="space-y-2">
+                    <p className="font-medium text-foreground flex items-center gap-2">
+                      <Building2 className="size-4 text-muted-foreground shrink-0" />
+                      {labInfo.name}
+                    </p>
+                    {labInfo.address && (
+                      <p className="text-sm text-muted-foreground flex items-center gap-2">
+                        <MapPin className="size-4 shrink-0" />
+                        {labInfo.address}
+                      </p>
+                    )}
+                    {labInfo.phone && (
+                      <p className="text-sm text-muted-foreground flex items-center gap-2">
+                        <Phone className="size-4 shrink-0" />
+                        {labInfo.phone}
+                      </p>
+                    )}
+                  </div>
+                ) : testResult.labId && testResult.labId !== 'manual-upload' ? (
+                  <p className="text-sm text-muted-foreground">Loading lab details...</p>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Manually uploaded by patient</p>
+                )}
+                <p className="text-label text-muted-foreground mt-3">
                   Contact your lab for any questions about these results
                 </p>
               </div>
@@ -262,5 +298,83 @@ export default function TestDetailPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+function FileViewer({ url }: { url: string }) {
+  const pathname = new URL(url).pathname.toLowerCase()
+  const isPdf = pathname.endsWith('.pdf')
+  const isImage = /\.(jpg|jpeg|png|webp)$/i.test(pathname)
+
+  const [loadError, setLoadError] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  return (
+    <Card className="p-6 overflow-hidden">
+      <div className="flex items-center gap-2 mb-4">
+        {isImage ? (
+          <FileImage className="size-5 text-primary" />
+        ) : (
+          <FileText className="size-5 text-primary" />
+        )}
+        <h2 className="text-title font-bold text-foreground">Uploaded Report</h2>
+      </div>
+
+      {loading && !loadError && (
+        <div className="w-full h-[300px] flex items-center justify-center bg-muted rounded border border-border animate-pulse">
+          <p className="text-muted-foreground text-body">Loading report...</p>
+        </div>
+      )}
+
+      {loadError ? (
+        <div className="text-center py-8">
+          <AlertCircle className="size-8 mx-auto mb-2 text-muted-foreground" />
+          <p className="text-body text-muted-foreground mb-2">Could not load the report file</p>
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary underline text-sm"
+          >
+            Open directly in browser instead
+          </a>
+        </div>
+      ) : isPdf ? (
+        <iframe
+          src={url}
+          className="w-full h-[500px] rounded border border-border"
+          title="Test Result PDF"
+          sandbox="allow-scripts allow-same-origin"
+          onLoad={() => setLoading(false)}
+          onError={() => { setLoadError(true); setLoading(false) }}
+          style={loading ? { display: 'none' } : undefined}
+        />
+      ) : (
+        <a href={url} target="_blank" rel="noopener noreferrer">
+          <img
+            src={url}
+            alt="Test Result"
+            className="w-full rounded border border-border cursor-pointer hover:opacity-90 transition"
+            loading="lazy"
+            onLoad={() => setLoading(false)}
+            onError={() => { setLoadError(true); setLoading(false) }}
+            style={loading ? { display: 'none' } : undefined}
+          />
+        </a>
+      )}
+
+      {!loadError && (
+        <p className="text-label text-muted-foreground mt-2 text-center">
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-foreground"
+          >
+            Open in new tab
+          </a>
+        </p>
+      )}
+    </Card>
   )
 }

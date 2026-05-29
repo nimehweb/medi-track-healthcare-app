@@ -8,8 +8,8 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
-import { getTestResults } from '@/lib/firestore'
-import { Waypoints, List, Search } from 'lucide-react'
+import { getTestResults, getLabById } from '@/lib/firestore'
+import { Waypoints, List, Search, Building2 } from 'lucide-react'
 
 interface TestResult {
   id: string
@@ -18,6 +18,7 @@ interface TestResult {
   uploadedAt?: any
   status: string
   labId?: string
+  labName?: string
   notes?: string
 }
 
@@ -46,7 +47,17 @@ export default function TestResultsPage() {
 
     const { data, error } = await getTestResults(user.uid)
     if (data) {
-      setTestResults(data as unknown as TestResult[])
+      const results = data as unknown as TestResult[]
+      const labIds = [...new Set(results.map((r) => r.labId).filter(Boolean) as string[])]
+      const labCache: Record<string, string> = {}
+      await Promise.all(
+        labIds.map(async (id) => {
+          if (id === 'manual-upload') return
+          const { data: lab } = await getLabById(id)
+          if (lab) labCache[id] = lab.name
+        })
+      )
+      setTestResults(results.map((r) => ({ ...r, labName: r.labId ? labCache[r.labId] : undefined })))
     }
     setPageLoading(false)
   }
@@ -181,9 +192,10 @@ export default function TestResultsPage() {
                         <p className="text-sm text-muted-foreground mt-1">
                           {formatDate(test)}
                         </p>
-                        {test.labId && test.labId !== 'manual-upload' && (
-                          <p className="text-xs text-muted-foreground mt-1">
-                            Lab: {test.labId}
+                        {test.labName && (
+                          <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                            <Building2 className="size-3" />
+                            {test.labName}
                           </p>
                         )}
                         {test.notes?.startsWith('Uploaded from:') && (

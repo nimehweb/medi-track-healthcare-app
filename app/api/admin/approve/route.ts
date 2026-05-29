@@ -30,6 +30,27 @@ export async function POST(request: NextRequest) {
       approvedAt: Timestamp.now(),
     })
 
+    // Set custom claims on lab staff user so Storage rules can verify role
+    try {
+      const usersSnap = await adminDb
+        .collection('users')
+        .where('labId', '==', labId)
+        .get()
+
+      let claimsSet = false
+      for (const doc of usersSnap.docs) {
+        await adminAuth.setCustomUserClaims(doc.id, { role: 'lab_staff' })
+        claimsSet = true
+        console.log(`Custom claims set for user ${doc.id} (labId: ${labId})`)
+      }
+
+      if (!claimsSet) {
+        console.warn(`No user found with labId: ${labId} — custom claims not set`)
+      }
+    } catch (claimsError) {
+      console.error('Failed to set custom claims:', claimsError)
+    }
+
     // Email notification stub — add real email sending later
     if (userEmail) {
       console.log(`[EMAIL STUB] Approval notification sent to ${userEmail}`)

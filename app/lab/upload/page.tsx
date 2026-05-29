@@ -109,16 +109,23 @@ export default function LabUploadPage() {
         }
       }
 
+      const testPayload: {
+        testName: string
+        testType?: string
+        results?: any
+        pdfUrl?: string
+      } = {
+        testName: testName || testType,
+        testType,
+      }
+      if (resultValues) testPayload.results = { value: resultValues }
+      if (pdfUrl) testPayload.pdfUrl = pdfUrl
+
       const { id, error: createError } = await createLabTestResult(
         patient.healthId,
         labId,
         labStaffId,
-        {
-          testName: testName || testType,
-          testType,
-          results: resultValues ? { value: resultValues } : undefined,
-          pdfUrl,
-        }
+        testPayload
       )
 
       if (createError) {

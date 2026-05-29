@@ -9,7 +9,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import Link from 'next/link'
-import { getAppointments, rescheduleAppointment } from '@/lib/firestore'
+import { getAppointments, rescheduleAppointment, getLabById } from '@/lib/firestore'
+import { Building2 } from 'lucide-react'
 
 interface Appointment {
   id: string
@@ -17,6 +18,7 @@ interface Appointment {
   appointmentDate: any
   status: string
   labId?: string
+  labName?: string
 }
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
@@ -53,7 +55,16 @@ export default function AppointmentsPage() {
 
     const { data } = await getAppointments(user.uid)
     if (data) {
-      setAppointments(data)
+      const apts = data as Appointment[]
+      const labIds = [...new Set(apts.map((a) => a.labId).filter(Boolean) as string[])]
+      const labCache: Record<string, string> = {}
+      await Promise.all(
+        labIds.map(async (id) => {
+          const { data: lab } = await getLabById(id)
+          if (lab) labCache[id] = lab.name
+        })
+      )
+      setAppointments(apts.map((a) => ({ ...a, labName: a.labId ? labCache[a.labId] : undefined })))
     }
     setPageLoading(false)
   }
@@ -157,9 +168,12 @@ export default function AppointmentsPage() {
                           {apt.appointmentDate?.toDate?.()?.toLocaleTimeString?.() ||
                             'Time not available'}
                         </p>
-                        <p className="text-sm text-muted-foreground mt-2">
-                          Lab: {apt.labId || 'Lab details'}
-                        </p>
+                        {apt.labName && (
+                          <p className="text-sm text-muted-foreground mt-2 flex items-center gap-1">
+                            <Building2 className="size-3.5" />
+                            {apt.labName}
+                          </p>
+                        )}
                       </div>
                       <div className="flex items-center gap-2">
                         <span className={`text-xs px-3 py-1 rounded-full font-medium ${statusCfg.className}`}>

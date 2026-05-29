@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Spinner } from '@/components/ui/spinner'
 import { getDrugInfo, isGeminiAvailable } from '@/lib/gemini'
-import { AlertCircle, Pill } from 'lucide-react'
+import { AlertCircle, Pill, Info } from 'lucide-react'
 
 interface MedicationInfoCardProps {
   name: string
@@ -23,31 +24,22 @@ export function MedicationInfoCard({
   cachedInfo,
 }: MedicationInfoCardProps) {
   const [info, setInfo] = useState<string>(cachedInfo || '')
-  const [loading, setLoading] = useState(!cachedInfo && isGeminiAvailable())
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (cachedInfo || !isGeminiAvailable()) {
+  const fetchDrugInfo = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const result = await getDrugInfo(name)
+      setInfo(result)
+    } catch (err: any) {
+      console.error('Failed to fetch drug info:', err)
+      setError(err.message || 'Failed to load medication information')
+    } finally {
       setLoading(false)
-      return
     }
-
-    const fetchDrugInfo = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-        const result = await getDrugInfo(name)
-        setInfo(result)
-      } catch (err: any) {
-        console.error('Failed to fetch drug info:', err)
-        setError(err.message || 'Failed to load medication information')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchDrugInfo()
-  }, [name, cachedInfo])
+  }
 
   return (
     <Card className="p-6">
@@ -73,15 +65,19 @@ export function MedicationInfoCard({
             <span className="text-body">Loading medication information...</span>
           </div>
         ) : error ? (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              <p className="text-label">Could not load medication details</p>
-              <p className="text-label text-muted-foreground mt-1">
-                Please consult with your pharmacist
-              </p>
-            </AlertDescription>
-          </Alert>
+          <div>
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                <p className="text-label">Could not load medication details</p>
+                <p className="text-label text-muted-foreground mt-1">{error}</p>
+              </AlertDescription>
+            </Alert>
+            <Button onClick={fetchDrugInfo} variant="outline" size="sm" className="gap-2">
+              <Info className="size-4" />
+              Retry
+            </Button>
+          </div>
         ) : info ? (
           <div className="space-y-3 text-body text-foreground">
             {info.split('\n').filter(Boolean).map((line, idx) => (
@@ -89,6 +85,16 @@ export function MedicationInfoCard({
                 {line}
               </p>
             ))}
+          </div>
+        ) : isGeminiAvailable() ? (
+          <div>
+            <p className="text-body text-muted-foreground mb-3">
+              Learn more about this medication — what it's used for, common side effects, and how to take it.
+            </p>
+            <Button onClick={fetchDrugInfo} variant="outline" size="sm" className="gap-2">
+              <Info className="size-4" />
+              Get Drug Info
+            </Button>
           </div>
         ) : (
           <p className="text-body text-muted-foreground">

@@ -512,6 +512,22 @@ export const getActiveLabsByStatus = async (status: LabStatus) => {
   }
 }
 
+export const getLabByStaffId = async (staffId: string) => {
+  try {
+    const userSnap = await getDoc(doc(db, 'users', staffId))
+    if (!userSnap.exists()) return { data: null, error: 'Staff profile not found' }
+    const labId = userSnap.data().labId
+    if (!labId) return { data: null, error: 'No lab assigned to this staff' }
+    const labSnap = await getDoc(doc(db, 'labs', labId))
+    if (labSnap.exists()) {
+      return { data: { id: labSnap.id, ...labSnap.data() } as Lab, error: null }
+    }
+    return { data: null, error: 'Lab not found' }
+  } catch (error: any) {
+    return { data: null, error: error.message }
+  }
+}
+
 // ============================================================================
 // MEDICATIONS OPERATIONS
 // ============================================================================

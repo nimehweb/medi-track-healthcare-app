@@ -8,7 +8,7 @@ import { getUserProfile, getTestResultsByLab } from '@/lib/firestore'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Search, Clock, Download, Eye } from 'lucide-react'
+import { Search, Clock, Download, Eye, Pencil } from 'lucide-react'
 import Link from 'next/link'
 
 export default function LabHistoryPage() {
@@ -102,6 +102,11 @@ export default function LabHistoryPage() {
                             </Button>
                           </a>
                         )}
+                        <Link href={`/lab/edit/${r.id}`}>
+                          <Button variant="ghost" size="sm">
+                            <Pencil className="size-4" />
+                          </Button>
+                        </Link>
                         <Link href={`/test-results/${r.id}`}>
                           <Button variant="ghost" size="sm">
                             <Eye className="size-4" />
