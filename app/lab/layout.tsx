@@ -25,11 +25,11 @@ export default function LabLayout({ children }: { children: React.ReactNode }) {
   const [authorized, setAuthorized] = useState(false)
   const [labName, setLabName] = useState('')
   const [isPublicPage, setIsPublicPage] = useState(
-    pathname === '/lab/login' || pathname === '/lab/register'
+    pathname === '/lab/login' || pathname === '/lab/register' || pathname === '/lab/pending'
   )
 
   useEffect(() => {
-    setIsPublicPage(pathname === '/lab/login' || pathname === '/lab/register')
+    setIsPublicPage(pathname === '/lab/login' || pathname === '/lab/register' || pathname === '/lab/pending')
   }, [pathname])
 
   useEffect(() => {
@@ -83,7 +83,7 @@ export default function LabLayout({ children }: { children: React.ReactNode }) {
         <div className="p-5 border-b border-border">
           <Link href="/lab/dashboard" className="flex items-center gap-2">
             <Hospital className="size-5 text-primary" />
-            <span className="font-bold text-foreground">MediTrack Lab</span>
+            <span className="font-bold text-foreground">MediTrack Hospital</span>
           </Link>
           <p className="text-xs text-muted-foreground mt-1 truncate">{labName}</p>
         </div>

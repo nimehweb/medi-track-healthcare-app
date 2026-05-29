@@ -50,6 +50,8 @@ export const ALLOWED_FILE_TYPES = [
 
 export const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
 
+export const MAX_LICENSE_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+
 export function validateTestFile(file: File): string | null {
   if (!ALLOWED_FILE_TYPES.includes(file.type)) {
     return 'Only PDF, JPEG, PNG, and WebP files are allowed'
@@ -58,4 +60,36 @@ export function validateTestFile(file: File): string | null {
     return 'File size must be under 10MB'
   }
   return null
+}
+
+export function validateLicenseFile(file: File): string | null {
+  if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+    return 'Only PDF, JPEG, and PNG files are allowed'
+  }
+  if (file.size > MAX_LICENSE_FILE_SIZE) {
+    return 'File size must be under 5MB'
+  }
+  return null
+}
+
+export async function uploadLicenseDocument(
+  labId: string,
+  file: File
+): Promise<{ url: string; error: null } | { url: null; error: string }> {
+  try {
+    if (!storage) {
+      return { url: null, error: 'Firebase Storage not initialized' }
+    }
+
+    const ext = file.name.split('.').pop() || 'pdf'
+    const path = `lab-licenses/${labId}/license.${ext}`
+    const storageRef = ref(storage, path)
+
+    await uploadBytes(storageRef, file)
+    const url = await getDownloadURL(storageRef)
+
+    return { url, error: null }
+  } catch (err: any) {
+    return { url: null, error: err.message || 'Failed to upload license document' }
+  }
 }

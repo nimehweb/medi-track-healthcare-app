@@ -87,7 +87,7 @@ export default function LabDashboardPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Welcome, {labName}</h1>
-        <p className="text-muted-foreground mt-1">Manage patient test results and lab operations</p>
+        <p className="text-muted-foreground mt-1">Manage patient test results and hospital operations</p>
       </div>
 
       {/* Stats */}

@@ -1,18 +1,20 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { signUp } from '@/lib/auth'
-import { createUserProfile, createLab } from '@/lib/firestore'
+import { createUserProfile, createLab, updateLab } from '@/lib/firestore'
+import { uploadLicenseDocument, validateLicenseFile } from '@/lib/storage'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
-import { Hospital, AlertCircle } from 'lucide-react'
+import { Upload, FileText, Hospital, AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
 export default function LabRegisterPage() {
   const router = useRouter()
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -23,12 +25,27 @@ export default function LabRegisterPage() {
     phone: '',
     staffName: '',
   })
+  const [licenseFile, setLicenseFile] = useState<File | null>(null)
+  const [licenseError, setLicenseError] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [registered, setRegistered] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0]
+    if (!selected) return
+    const validationError = validateLicenseFile(selected)
+    if (validationError) {
+      setLicenseError(validationError)
+      setLicenseFile(null)
+      return
+    }
+    setLicenseError(null)
+    setLicenseFile(selected)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,62 +60,69 @@ export default function LabRegisterPage() {
       setError('Password must be at least 6 characters')
       return
     }
+    if (!licenseFile) {
+      setError('Please upload your hospital license certificate')
+      return
+    }
 
     setLoading(true)
 
-    const { user, error: signUpError } = await signUp(formData.email, formData.password)
-    if (signUpError || !user) {
-      setError(signUpError || 'Signup failed')
+    try {
+      // Step 1: Create Firebase Auth user
+      const { user, error: signUpError } = await signUp(formData.email, formData.password)
+      if (signUpError || !user) {
+        setError(signUpError || 'Signup failed')
+        setLoading(false)
+        return
+      }
+
+      // Step 2: Create lab entry
+      const { id: labId, error: labError } = await createLab({
+        name: formData.labName,
+        address: formData.labAddress,
+        licenseNumber: formData.licenseNumber,
+        phone: formData.phone,
+        email: formData.email,
+        status: 'inactive',
+      })
+
+      if (labError || !labId) {
+        setError(labError || 'Failed to create lab')
+        setLoading(false)
+        return
+      }
+
+      // Step 3: Create lab staff profile (with labId, role: lab_staff)
+      // Done BEFORE license upload so a storage failure doesn't leave the account orphaned
+      const { error: profileError } = await createUserProfile(user.uid, {
+        email: formData.email,
+        name: formData.staffName,
+        role: 'lab_staff',
+        labId,
+        phone: formData.phone || undefined,
+      })
+
+      if (profileError) {
+        setError(profileError || 'Failed to create user profile')
+        setLoading(false)
+        return
+      }
+
+      // Step 4: Upload license document (non-critical — profile already exists)
+      const { url, error: uploadError } = await uploadLicenseDocument(labId, licenseFile)
+      if (uploadError || !url) {
+        console.warn('License upload failed, registration still complete:', uploadError)
+      } else {
+        // Step 5: Update lab with license document URL (best-effort)
+        await updateLab(labId, { licenseDocumentUrl: url })
+      }
+
       setLoading(false)
-      return
-    }
-
-    // Create lab entry
-    const { id: labId, error: labError } = await createLab({
-      name: formData.labName,
-      address: formData.labAddress,
-      licenseNumber: formData.licenseNumber,
-      phone: formData.phone,
-      email: formData.email,
-      status: 'inactive',
-    })
-
-    if (labError || !labId) {
-      setError(labError || 'Failed to create lab')
+      router.push('/lab/pending')
+    } catch (err: any) {
+      setError(err?.message || 'An unexpected error occurred')
       setLoading(false)
-      return
     }
-
-    // Create lab staff profile
-    await createUserProfile(user.uid, {
-      email: formData.email,
-      name: formData.staffName,
-      role: 'lab_staff',
-      labId,
-      phone: formData.phone || undefined,
-    })
-
-    setRegistered(true)
-    setLoading(false)
-  }
-
-  if (registered) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md p-8 text-center">
-          <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Hospital className="size-8 text-accent" />
-          </div>
-          <h2 className="text-2xl font-bold text-foreground mb-2">Registration Submitted!</h2>
-          <p className="text-muted-foreground mb-6">
-            Your lab registration is pending admin approval. You'll be able to access the portal once verified.
-          </p>
-          <Link href="/lab/login">
-            <Button className="bg-primary hover:bg-primary/90">Go to Login</Button>
-          </Link>
-        </Card>
-      </div>
-    )
   }
 
   return (
@@ -109,8 +133,8 @@ export default function LabRegisterPage() {
             <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center mx-auto mb-4">
               <Hospital className="size-6 text-primary-foreground" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">Register Your Lab</h1>
-            <p className="text-muted-foreground mt-2">Get verified to start uploading patient results</p>
+            <h1 className="text-2xl font-bold text-foreground">Register Your Hospital</h1>
+            <p className="text-muted-foreground mt-2">Get verified to start serving patients</p>
           </div>
 
           <Alert className="mb-6">
@@ -122,11 +146,11 @@ export default function LabRegisterPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Lab / Hospital Name *</label>
-              <Input name="labName" value={formData.labName} onChange={handleChange} placeholder="City Diagnostics Center" required />
+              <label className="block text-sm font-medium text-foreground mb-1">Hospital Name *</label>
+              <Input name="labName" value={formData.labName} onChange={handleChange} placeholder="City Medical Center" required />
             </div>
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Lab Address *</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Hospital Address *</label>
               <Input name="labAddress" value={formData.labAddress} onChange={handleChange} placeholder="123 Health Street" required />
             </div>
             <div>
@@ -134,7 +158,32 @@ export default function LabRegisterPage() {
               <Input name="licenseNumber" value={formData.licenseNumber} onChange={handleChange} placeholder="e.g., HPC/LAB/2024/001" required />
             </div>
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1">Lab Phone</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Upload License Certificate * (PDF or image)</label>
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="border-2 border-dashed border-border rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition"
+              >
+                {licenseFile ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <FileText className="size-5 text-primary" />
+                    <p className="text-sm font-medium text-foreground">{licenseFile.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      ({(licenseFile.size / 1024 / 1024).toFixed(1)} MB)
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <Upload className="size-6 mx-auto mb-1 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">Upload your hospital license certificate</p>
+                    <p className="text-xs text-muted-foreground mt-1">PDF, JPEG, PNG up to 5MB</p>
+                  </div>
+                )}
+              </div>
+              <input ref={fileInputRef} type="file" accept=".pdf,.jpg,.jpeg,.png" onChange={handleFileSelect} className="hidden" />
+              {licenseError && <p className="text-xs text-destructive mt-1">{licenseError}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-1">Hospital Phone</label>
               <Input name="phone" value={formData.phone} onChange={handleChange} placeholder="+233 50 000 0000" />
             </div>
             <div>
@@ -161,7 +210,7 @@ export default function LabRegisterPage() {
             )}
 
             <Button type="submit" disabled={loading} className="w-full bg-primary hover:bg-primary/90">
-              {loading ? 'Submitting...' : 'Register Lab'}
+              {loading ? 'Submitting...' : 'Register Hospital'}
             </Button>
           </form>
 

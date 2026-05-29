@@ -97,46 +97,50 @@ export default function LabUploadPage() {
     setSending(true)
     setResult(null)
 
-    let pdfUrl: string | undefined
+    try {
+      let pdfUrl: string | undefined
 
-    if (file) {
-      const { url, error: uploadError } = await uploadTestFile(patient.id, file)
-      if (uploadError || !url) {
-        setResult({ success: false, error: uploadError || 'Upload failed' })
-        setSending(false)
-        return
+      if (file) {
+        const { url, error: uploadError } = await uploadTestFile(patient.id, file)
+        if (uploadError || !url) {
+          console.warn('File upload failed, sending result without attachment:', uploadError)
+        } else {
+          pdfUrl = url
+        }
       }
-      pdfUrl = url
+
+      const { id, error: createError } = await createLabTestResult(
+        patient.healthId,
+        labId,
+        labStaffId,
+        {
+          testName: testName || testType,
+          testType,
+          results: resultValues ? { value: resultValues } : undefined,
+          pdfUrl,
+        }
+      )
+
+      if (createError) {
+        setResult({ success: false, error: createError })
+      } else {
+        setResult({ success: true })
+
+        // Reset form
+        setTimeout(() => {
+          setTestName('')
+          setTestType('')
+          setResultValues('')
+          setFile(null)
+          setResult(null)
+          setPatient(null)
+          setPatientQuery('')
+        }, 3000)
+      }
+    } catch (err: any) {
+      setResult({ success: false, error: err?.message || 'An unexpected error occurred' })
     }
 
-    const { id, error: createError } = await createLabTestResult(
-      patient.healthId,
-      labId,
-      labStaffId,
-      {
-        testName: testName || testType,
-        testType,
-        results: resultValues ? { value: resultValues } : undefined,
-        pdfUrl,
-      }
-    )
-
-    if (createError) {
-      setResult({ success: false, error: createError })
-    } else {
-      setResult({ success: true })
-
-      // Reset form
-      setTimeout(() => {
-        setTestName('')
-        setTestType('')
-        setResultValues('')
-        setFile(null)
-        setResult(null)
-        setPatient(null)
-        setPatientQuery('')
-      }, 3000)
-    }
     setSending(false)
   }
 

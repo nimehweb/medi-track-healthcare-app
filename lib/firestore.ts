@@ -51,6 +51,7 @@ export interface Lab {
   name: string
   address: string
   licenseNumber: string
+  licenseDocumentUrl?: string
   status: LabStatus
   phone?: string
   email?: string
@@ -833,4 +834,30 @@ export const getLabDashboard = async (labId: string) => {
   } catch (error: any) {
     return { data: null, error: error.message }
   }
+}
+
+// ============================================================================
+// REAL-TIME LAB DOCUMENT SUBSCRIPTION
+// ============================================================================
+
+export const subscribeToLabDocument = (
+  labId: string,
+  onData: (lab: any) => void,
+  onError?: (error: string) => void
+): Unsubscribe => {
+  const labRef = doc(db, 'labs', labId)
+  return onSnapshot(
+    labRef,
+    (snapshot) => {
+      if (snapshot.exists()) {
+        onData({ id: snapshot.id, ...snapshot.data() })
+      } else {
+        onData(null)
+      }
+    },
+    (error) => {
+      console.error('Lab document subscription error:', error)
+      onError?.(error.message)
+    }
+  )
 }

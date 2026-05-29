@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { signIn } from '@/lib/auth'
+import { signIn, signOut } from '@/lib/auth'
+import { getUserProfile } from '@/lib/firestore'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
@@ -29,6 +30,13 @@ export default function LoginPage() {
     }
 
     if (user) {
+      const { data: profile } = await getUserProfile(user.uid)
+      if (profile?.role === 'lab_staff') {
+        await signOut()
+        setError('This account belongs to a hospital. Please use the Hospital Portal login.')
+        setLoading(false)
+        return
+      }
       router.push('/dashboard')
     }
   }

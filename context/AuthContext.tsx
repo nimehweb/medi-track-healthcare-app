@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react'
 import { User } from 'firebase/auth'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
+import { getUserProfile } from '@/lib/firestore'
 
 type AuthContextType = {
   user: User | null
@@ -28,8 +29,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-        setUser(currentUser)
+      const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+        if (currentUser) {
+          const { data: profile } = await getUserProfile(currentUser.uid)
+          if (profile && profile.role === 'lab_staff') {
+            setUser(null)
+            setLoading(false)
+            return
+          }
+          setUser(currentUser)
+        } else {
+          setUser(null)
+        }
         setLoading(false)
       })
 
